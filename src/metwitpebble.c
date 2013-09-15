@@ -126,6 +126,7 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
 
 void on_failure(int32_t cookie, int http_status, void* context) {
   //HANDLE FAILURE
+  reset_location();
 }
 
 void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context) {

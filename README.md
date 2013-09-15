@@ -2,5 +2,5 @@ Metwit Pebble
 =============
 Metwit watchface for Pebble
 
-License
 -------
+Relased under MIT license, Copyright (c) 2013 A. Stagi stagi.andrea@gmail.com, P. Arminio patrick.arminio@gmail.com
