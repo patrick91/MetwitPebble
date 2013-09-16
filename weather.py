@@ -20,10 +20,10 @@ def weather():
     E.G. {'0': 0, '1': 1, '2': 78}
     """
 
-    latitude = float(request.form['0']) / 1000
-    longitude = float(request.form['1']) / 1000
+    latitude = float(request.json['0']) / 10000
+    longitude = float(request.json['1']) / 10000
 
-    format = request.form.get('2', 'c')
+    format = request.json.get('2', 'c')
 
     results = Metwit.weather.get(location_lat=latitude, location_lng=longitude)
 
@@ -35,12 +35,12 @@ def weather():
 
         # temperature is in Kelvin
 
-        if format is 'c':
+        if format == 'c':
             temperature = temperature - 273.15
         else:
             temperature = temperature * 9 / 5.0 - 459.67
 
-        return jsonify( {'0': 0, '1': 'TODO', '2': temperature})
+        return jsonify( {'0': 0, '1': 'TODO', '2': int(temperature)})
     else:
         error_code = error_codes['NO_RESULTS']
 
