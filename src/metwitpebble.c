@@ -3,14 +3,16 @@
 #include "pebble_fonts.h"
 #include "config.h"
 #include "http.h"
+#include "util.h"
 
 #define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x04, 0x9F, 0x49, 0xC0, 0x99, 0xAD }
 
 #define TIME_FRAME (GRect(0, 6, 144, 168-6))
 #define DATE_FRAME (GRect(0, 62, 144, 168-62))
 
-#define WEATHER_KEY_CONDITION 0
-#define WEATHER_KEY_TEMPERATURE 1
+#define WEATHER_KEY_RESULT_CODE 0
+#define WEATHER_KEY_CONDITION 1
+#define WEATHER_KEY_TEMPERATURE 2
 
 #define WEATHER_KEY_LATITUDE 0
 #define WEATHER_KEY_LONGITUDE 1
@@ -130,6 +132,16 @@ void on_failure(int32_t cookie, int http_status, void* context) {
 }
 
 void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context) {
+  static char temperature_text[] = "XXX UU";
+
+  Tuple* rescode_tuple = dict_find(received, WEATHER_KEY_RESULT_CODE);
+  if(rescode_tuple) {
+    int rescode = rescode_tuple->value->int8;
+    if(rescode) {
+      reset_location();
+      return;
+    }
+  }
   Tuple* weather_tuple = dict_find(received, WEATHER_KEY_CONDITION);
   if(weather_tuple) {
     //HANDLE WEATHER CONDITION RECEIVE
@@ -137,6 +149,8 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
   Tuple* temperature_tuple = dict_find(received, WEATHER_KEY_TEMPERATURE);
   if(temperature_tuple) {
     //HANDLE TEMPERATURE RECEIVE
+    int temperature = temperature_tuple->value->int16;
+    text_layer_set_text(&date_layer, itoa(temperature));
   }
   
 }

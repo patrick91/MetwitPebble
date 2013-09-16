@@ -1,2 +1,2 @@
 //#define DEBUG
-#define UNIT_SYSTEM "f"
+#define UNIT_SYSTEM "c"
