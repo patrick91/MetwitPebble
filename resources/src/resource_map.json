@@ -1,11 +1,17 @@
-
-{"friendlyVersion": "VERSION",
- "versionDefName": "VERSION",
- "media": [
-	   {
-	    "type":"raw",
-	    "defName":"DUMMY",
-	    "file":"resource_map.json"
-	   }
-	  ]
+{
+    "media": [
+        {
+            "defName": "ICON_RAINY",
+            "type": "png",
+            "file": "images/rainy.png"
+        },
+        {
+            "characterRegex": "[:0-9]",
+            "defName": "FONT_ROBOTO_BOLD_SUBSET_49",
+            "type": "font",
+            "file": "fonts/Roboto-Bold.ttf"
+        }
+    ],
+    "friendlyVersion": "VERSION",
+    "versionDefName": "APP_RESOURCES"
 }

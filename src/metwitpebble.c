@@ -9,6 +9,8 @@
 
 #define TIME_FRAME (GRect(0, 6, 144, 168-6))
 #define DATE_FRAME (GRect(0, 62, 144, 168-62))
+#define ICON_FRAME (GRect(0, 100, 60, 60))
+#define TEMPERATURE_FRAME (GRect(60, 105, 144, 168-62))
 
 #define WEATHER_KEY_RESULT_CODE 0
 #define WEATHER_KEY_CONDITION 1
@@ -31,6 +33,9 @@ PBL_APP_INFO(MY_UUID,
 Window window;
 TextLayer time_layer;
 TextLayer date_layer;
+TextLayer temperature_layer;
+BmpContainer icon_weather;
+Layer icon_w_layer;
 
 int my_latitude = -1, my_longitude = -1;
 
@@ -68,10 +73,12 @@ void handle_init(AppContextRef ctx) {
   window_stack_push(&window, true);
   window_set_background_color(&window, GColorBlack);
 
+  resource_init_current_app(&APP_RESOURCES);
+
   //Init time layer
   text_layer_init(&time_layer, window.layer.frame);
   text_layer_set_text(&time_layer, "00:00");
-  text_layer_set_font(&time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_font(&time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_49)));
   text_layer_set_text_color(&time_layer, GColorWhite);
   text_layer_set_background_color(&time_layer, GColorClear);
   text_layer_set_text_alignment(&time_layer, GTextAlignmentCenter);
@@ -81,12 +88,31 @@ void handle_init(AppContextRef ctx) {
   //Init date layer
   text_layer_init(&date_layer, window.layer.frame);
   text_layer_set_text(&date_layer, "XXX, XXX 00");
-  text_layer_set_font(&date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_font(&date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text_color(&date_layer, GColorWhite);
   text_layer_set_background_color(&date_layer, GColorClear);
   text_layer_set_text_alignment(&date_layer, GTextAlignmentCenter);
   layer_set_frame(&date_layer.layer, DATE_FRAME);
   layer_add_child(&window.layer, &date_layer.layer);
+
+  //Draw horizontal line
+  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_draw_line(ctx, GPoint(0, 100), GPoint(100, 100));
+
+  //Init temperature layer
+  text_layer_init(&temperature_layer, window.layer.frame);
+  text_layer_set_text(&temperature_layer, "...");
+  text_layer_set_font(&temperature_layer, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK));
+  text_layer_set_text_color(&temperature_layer, GColorWhite);
+  text_layer_set_background_color(&temperature_layer, GColorClear);
+  layer_set_frame(&temperature_layer.layer, TEMPERATURE_FRAME);
+  layer_add_child(&window.layer, &temperature_layer.layer);
+
+  //Init weather icon
+  bmp_init_container(RESOURCE_ID_ICON_RAINY, &icon_weather);
+  layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
+  layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
+  layer_add_child(&window.layer, &icon_w_layer);
 
   http_register_callbacks((HTTPCallbacks){.failure=on_failure,.success=on_success,.reconnect=on_reconnect,.location=on_location}, (void*)ctx);
 
@@ -132,7 +158,7 @@ void on_failure(int32_t cookie, int http_status, void* context) {
 }
 
 void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context) {
-  static char temperature_text[] = "XXX UU";
+  static char temperature_text[] = "XX°C";
 
   Tuple* rescode_tuple = dict_find(received, WEATHER_KEY_RESULT_CODE);
   if(rescode_tuple) {
@@ -149,8 +175,13 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
   Tuple* temperature_tuple = dict_find(received, WEATHER_KEY_TEMPERATURE);
   if(temperature_tuple) {
     //HANDLE TEMPERATURE RECEIVE
-    int temperature = temperature_tuple->value->int16;
-    text_layer_set_text(&date_layer, itoa(temperature));
+    int16_t temperature = temperature_tuple->value->int16;
+    memcpy(temperature_text, itoa(temperature), 2);
+    if(strcmp(UNIT_SYSTEM, "C") == 0)
+      temperature_text[4] = 'C';
+    else
+      temperature_text[4] = 'F';
+    text_layer_set_text(&temperature_layer, temperature_text);
   }
   
 }
