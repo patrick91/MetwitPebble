@@ -9,6 +9,23 @@ error_codes = {
     'NO_RESULTS': 1
 }
 
+
+def get_result_with_temperature(results):
+    """
+    Returns the first result with temperature found in results.
+    If no result with temperature is found returns None.
+    """
+
+    for result in results:
+        weather = result['weather']
+
+        if 'measured' in weather and 'temperature' in weather['measured']:
+            print result
+            return result
+
+    return None
+
+
 @app.route("/weather", methods = ['POST'])
 def weather():
     """
@@ -26,9 +43,10 @@ def weather():
 
     results = Metwit.weather.get(location_lat=latitude, location_lng=longitude)
 
-    if len(results) > 1:
-        weather = results[0]['weather']
+    result = get_result_with_temperature(results)
 
+    if results is not None:
+        weather = result['weather']
         temperature = weather['measured']['temperature']
         status = weather['status']
 
