@@ -1,6 +1,8 @@
-import requests, math
-from flask import Flask, request, jsonify
+import math
+
 from metwit import Metwit
+
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 app.debug = True
@@ -26,7 +28,7 @@ def get_result_with_temperature(results):
     return None
 
 
-@app.route("/weather", methods = ['POST'])
+@app.route("/weather", methods=['POST'])
 def weather():
     """
     INPUT BUNDLE: {'0': latitude, '1': longitude, '2': unit ("F" or "C")}
@@ -56,7 +58,12 @@ def weather():
             temperature = temperature - 273.15
         else:
             temperature = temperature * 9 / 5.0 - 459.67
-        return jsonify( {'0': 0, '1': 'TODO', '2': int(math.ceil(temperature))})
+
+        return jsonify({
+            '0': 0,
+            '1': 'TODO',
+            '2': int(math.ceil(temperature))
+        })
     else:
         error_code = error_codes['NO_RESULTS']
 
