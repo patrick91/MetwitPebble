@@ -11,6 +11,26 @@ error_codes = {
     'NO_RESULTS': 1
 }
 
+weather_statuses = {
+    'unknown': 0,
+    'sunny': 1,
+    'rainy': 2,
+    'stormy': 3,
+    'snowy': 4,
+    'partly_cloudy': 5,
+    'cloudy': 6,
+    'hailing': 7,
+    'heavy_seas': 8,
+    'calm_seas': 9,
+    'foggy': 10,
+    'snow_flurries': 11,
+    'windy': 12,
+    'clear_moon': 13,
+    'partly_moon': 14,
+    'twitter': 15,
+    'instagram': 15,
+}
+
 
 def get_result_with_temperature(results):
     """
@@ -22,7 +42,6 @@ def get_result_with_temperature(results):
         weather = result['weather']
 
         if 'measured' in weather and 'temperature' in weather['measured']:
-            print result
             return result
 
     return None
@@ -47,10 +66,16 @@ def weather():
 
     result = get_result_with_temperature(results)
 
-    if results is not None:
+    if result is not None:
         weather = result['weather']
         temperature = weather['measured']['temperature']
-        status = weather['status']
+
+        icon_name = result['icon'].split('/')[-1]
+
+        if icon_name in weather_statuses:
+            status = weather_statuses[icon_name]
+        else:
+            status = weather_statuses['unknown']
 
         # temperature is in Kelvin
 
@@ -61,7 +86,7 @@ def weather():
 
         return jsonify({
             '0': 0,
-            '1': 'TODO',
+            '1': status,
             '2': int(math.ceil(temperature))
         })
     else:
