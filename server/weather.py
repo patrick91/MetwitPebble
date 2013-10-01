@@ -95,8 +95,6 @@ def weather():
     return jsonify({'0': error_code})
 
 def format_temperature(temperature):
-    temperature = -13.45
-    print temperature
     return int(round(temperature))
 
 @app.route('/')
