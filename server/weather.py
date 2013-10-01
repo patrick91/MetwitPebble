@@ -87,13 +87,17 @@ def weather():
         return jsonify({
             '0': 0,
             '1': status,
-            '2': int(math.ceil(temperature))
+            '2': format_temperature(temperature)
         })
     else:
         error_code = error_codes['NO_RESULTS']
 
     return jsonify({'0': error_code})
 
+def format_temperature(temperature):
+    temperature = -13.45
+    print temperature
+    return int(round(temperature))
 
 @app.route('/')
 def home():

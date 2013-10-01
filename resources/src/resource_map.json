@@ -1,9 +1,79 @@
 {
     "media": [
         {
+            "defName": "ICON_CLOUDY",
+            "type": "png",
+            "file": "images/cloudy.png"
+        },
+        {
+            "defName": "ICON_FOGGY",
+            "type": "png",
+            "file": "images/foggy.png"
+        },
+        {
+            "defName": "ICON_HAILING",
+            "type": "png",
+            "file": "images/hailing.png"
+        },
+        {
+            "defName": "ICON_MOON",
+            "type": "png",
+            "file": "images/moon.png"
+        },
+        {
+            "defName": "ICON_PCLOUDY",
+            "type": "png",
+            "file": "images/pcloudy.png"
+        },
+        {
+            "defName": "ICON_PMOONCLOUDY",
+            "type": "png",
+            "file": "images/pmooncloudy.png"
+        },
+        {
             "defName": "ICON_RAINY",
             "type": "png",
             "file": "images/rainy.png"
+        },
+        {
+            "defName": "ICON_SNOWFLURRY",
+            "type": "png",
+            "file": "images/snowflurry.png"
+        },
+        {
+            "defName": "ICON_SNOWY",
+            "type": "png",
+            "file": "images/snowy.png"
+        },
+        {
+            "defName": "ICON_SUNNY",
+            "type": "png",
+            "file": "images/sunny.png"
+        },
+        {
+            "defName": "ICON_WINDY",
+            "type": "png",
+            "file": "images/windy.png"
+        },
+        {
+            "defName": "ICON_STORMY",
+            "type": "png",
+            "file": "images/stormy.png"
+        },
+        {
+            "defName": "ICON_HEAVYSEAS",
+            "type": "png",
+            "file": "images/hseas.png"
+        },
+        {
+            "defName": "ICON_CALMSEAS",
+            "type": "png",
+            "file": "images/cseas.png"
+        },
+        {
+            "defName": "ICON_UNKNOWN",
+            "type": "png",
+            "file": "images/unknown.png"
         },
         {
             "characterRegex": "[:0-9]",

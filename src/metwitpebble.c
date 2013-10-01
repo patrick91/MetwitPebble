@@ -37,6 +37,24 @@ TextLayer temperature_layer;
 BmpContainer icon_weather;
 Layer icon_w_layer;
 
+uint8_t STATUS_RESOURCES[] = {
+  RESOURCE_ID_ICON_UNKNOWN,
+  RESOURCE_ID_ICON_SUNNY,
+  RESOURCE_ID_ICON_RAINY,
+  RESOURCE_ID_ICON_STORMY,
+  RESOURCE_ID_ICON_SNOWY,
+  RESOURCE_ID_ICON_PCLOUDY,
+  RESOURCE_ID_ICON_CLOUDY,
+  RESOURCE_ID_ICON_HAILING,
+  RESOURCE_ID_ICON_HEAVYSEAS,
+  RESOURCE_ID_ICON_CALMSEAS,
+  RESOURCE_ID_ICON_FOGGY,
+  RESOURCE_ID_ICON_SNOWFLURRY,
+  RESOURCE_ID_ICON_WINDY,
+  RESOURCE_ID_ICON_MOON,
+  RESOURCE_ID_ICON_PMOONCLOUDY,
+};
+
 int my_latitude = -1, my_longitude = -1;
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t);
@@ -102,16 +120,13 @@ void handle_init(AppContextRef ctx) {
   //Init temperature layer
   text_layer_init(&temperature_layer, window.layer.frame);
   text_layer_set_text(&temperature_layer, "...");
-  text_layer_set_font(&temperature_layer, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK));
+  text_layer_set_font(&temperature_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   text_layer_set_text_color(&temperature_layer, GColorWhite);
   text_layer_set_background_color(&temperature_layer, GColorClear);
   layer_set_frame(&temperature_layer.layer, TEMPERATURE_FRAME);
   layer_add_child(&window.layer, &temperature_layer.layer);
 
   //Init weather icon
-  bmp_init_container(RESOURCE_ID_ICON_RAINY, &icon_weather);
-  layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
-  layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
   layer_add_child(&window.layer, &icon_w_layer);
 
   http_register_callbacks((HTTPCallbacks){.failure=on_failure,.success=on_success,.reconnect=on_reconnect,.location=on_location}, (void*)ctx);
@@ -158,7 +173,7 @@ void on_failure(int32_t cookie, int http_status, void* context) {
 }
 
 void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context) {
-  static char temperature_text[] = "XX°C";
+  static char temperature_text[] = "     ";
 
   Tuple* rescode_tuple = dict_find(received, WEATHER_KEY_RESULT_CODE);
   if(rescode_tuple) {
@@ -171,16 +186,21 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
   Tuple* weather_tuple = dict_find(received, WEATHER_KEY_CONDITION);
   if(weather_tuple) {
     //HANDLE WEATHER CONDITION RECEIVE
+    int8_t weather_status = weather_tuple->value->int8;
+    bmp_init_container(STATUS_RESOURCES[weather_status], &icon_weather);
+    layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
+    layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
   }
   Tuple* temperature_tuple = dict_find(received, WEATHER_KEY_TEMPERATURE);
   if(temperature_tuple) {
     //HANDLE TEMPERATURE RECEIVE
     int16_t temperature = temperature_tuple->value->int16;
-    memcpy(temperature_text, itoa(temperature), 2);
-    if(strcmp(UNIT_SYSTEM, "C") == 0)
-      temperature_text[4] = 'C';
-    else
-      temperature_text[4] = 'F';
+    uint8_t sign = 0;
+    if(temperature > 0)
+      sign = 1;
+    memcpy(&temperature_text[sign], itoa(temperature), 4);
+    uint8_t degree_pos = strlen(temperature_text);
+    memcpy(&temperature_text[degree_pos], "°", 3);
     text_layer_set_text(&temperature_layer, temperature_text);
   }
   
