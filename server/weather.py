@@ -88,11 +88,11 @@ def weather():
             '0': 0,
             '1': status,
             '2': format_temperature(temperature)
-        })
+        }), 200
     else:
         error_code = error_codes['NO_RESULTS']
 
-    return jsonify({'0': error_code})
+    return jsonify({'0': error_code}), 503
 
 def format_temperature(temperature):
     return int(round(temperature))

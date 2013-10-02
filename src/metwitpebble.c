@@ -22,7 +22,7 @@
 
 #define WEATHER_HTTP_COOKIE 1949327671
 
-#define REQUEST_WEATHER_URL "http://192.168.0.6:5000/weather"
+#define REQUEST_WEATHER_URL "http://glacial-island-2381.herokuapp.com/weather"
 
 PBL_APP_INFO(MY_UUID,
              "Metwit", "A.Stagi-P.Arminio",
@@ -56,6 +56,7 @@ uint8_t STATUS_RESOURCES[] = {
 };
 
 int my_latitude = -1, my_longitude = -1;
+int8_t current_weather_status = -1;
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t);
 void handle_init(AppContextRef ctx);
@@ -186,8 +187,12 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
   Tuple* weather_tuple = dict_find(received, WEATHER_KEY_CONDITION);
   if(weather_tuple) {
     //HANDLE WEATHER CONDITION RECEIVE
-    int8_t weather_status = weather_tuple->value->int8;
-    bmp_init_container(STATUS_RESOURCES[weather_status], &icon_weather);
+    if(current_weather_status != -1) {
+      layer_remove_from_parent(&icon_weather.layer.layer);
+      bmp_deinit_container(&icon_weather);
+    }
+    current_weather_status = weather_tuple->value->int8;
+    bmp_init_container(STATUS_RESOURCES[current_weather_status], &icon_weather);
     layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
     layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
   }
