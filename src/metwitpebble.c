@@ -65,9 +65,9 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
 void on_location(float latitude, float longitude, float altitude, float accuracy, void* context);
 void on_reconnect(void* context);
 void request_weather();
-
+int8_t need_to_refresh_icon(uint8_t status);
 void reset_location();
-int is_located();
+int8_t is_located();
 
 void pbl_main(void *params) {
   PebbleAppHandlers handlers = {
@@ -187,14 +187,17 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
   Tuple* weather_tuple = dict_find(received, WEATHER_KEY_CONDITION);
   if(weather_tuple) {
     //HANDLE WEATHER CONDITION RECEIVE
-    if(current_weather_status != -1) {
-      layer_remove_from_parent(&icon_weather.layer.layer);
-      bmp_deinit_container(&icon_weather);
+    uint8_t weather_status = weather_tuple->value->int8;
+    if(need_to_refresh_icon(weather_status)) {
+      if(current_weather_status != -1) {
+        layer_remove_from_parent(&icon_weather.layer.layer);
+        bmp_deinit_container(&icon_weather);
+      }
+      current_weather_status = weather_status;
+      bmp_init_container(STATUS_RESOURCES[current_weather_status], &icon_weather);
+      layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
+      layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
     }
-    current_weather_status = weather_tuple->value->int8;
-    bmp_init_container(STATUS_RESOURCES[current_weather_status], &icon_weather);
-    layer_set_frame(&icon_weather.layer.layer, ICON_FRAME);
-    layer_add_child(&icon_w_layer, &icon_weather.layer.layer);
   }
   Tuple* temperature_tuple = dict_find(received, WEATHER_KEY_TEMPERATURE);
   if(temperature_tuple) {
@@ -236,11 +239,13 @@ void request_weather() {
   dict_write_cstring(body, WEATHER_KEY_UNIT_SYSTEM, UNIT_SYSTEM);
   if(result != HTTP_OK) {
     //HANDLE FAILURE
+    reset_location();
     return;
   }
   // Send it.
   if(http_out_send() != HTTP_OK) {
     //HANDLE FAILURE
+    reset_location();
     return;
   }
 }
@@ -250,6 +255,17 @@ void reset_location() {
   my_longitude = -1;
 }
 
-int is_located() {
+int8_t is_located() {
   return my_longitude != -1 ? 1 : 0;
+}
+
+int8_t need_to_refresh_icon(uint8_t status) {
+  if(status == 0 && current_weather_status != -1)
+    return 0;
+  else if(status > 14)
+    return 0;
+  else if(status == current_weather_status)
+    return 0;
+  else
+    return 1;
 }
