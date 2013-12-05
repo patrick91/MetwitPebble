@@ -97,7 +97,7 @@ void handle_init(AppContextRef ctx) {
   //Init time layer
   text_layer_init(&time_layer, window.layer.frame);
   text_layer_set_text(&time_layer, "00:00");
-  text_layer_set_font(&time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_49)));
+  text_layer_set_font(&time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_49)));
   text_layer_set_text_color(&time_layer, GColorWhite);
   text_layer_set_background_color(&time_layer, GColorClear);
   text_layer_set_text_alignment(&time_layer, GTextAlignmentCenter);
@@ -107,7 +107,7 @@ void handle_init(AppContextRef ctx) {
   //Init date layer
   text_layer_init(&date_layer, window.layer.frame);
   text_layer_set_text(&date_layer, "XXX, XXX 00");
-  text_layer_set_font(&date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(&date_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_23)));
   text_layer_set_text_color(&date_layer, GColorWhite);
   text_layer_set_background_color(&date_layer, GColorClear);
   text_layer_set_text_alignment(&date_layer, GTextAlignmentCenter);
@@ -121,7 +121,7 @@ void handle_init(AppContextRef ctx) {
   //Init temperature layer
   text_layer_init(&temperature_layer, window.layer.frame);
   text_layer_set_text(&temperature_layer, "...");
-  text_layer_set_font(&temperature_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_font(&temperature_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_35)));
   text_layer_set_text_color(&temperature_layer, GColorWhite);
   text_layer_set_background_color(&temperature_layer, GColorClear);
   layer_set_frame(&temperature_layer.layer, TEMPERATURE_FRAME);
@@ -174,7 +174,7 @@ void on_failure(int32_t cookie, int http_status, void* context) {
 }
 
 void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context) {
-  static char temperature_text[] = "     ";
+  static char temperature_text[] = "      ";
 
   Tuple* rescode_tuple = dict_find(received, WEATHER_KEY_RESULT_CODE);
   if(rescode_tuple) {
@@ -209,6 +209,7 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
     memcpy(&temperature_text[sign], itoa(temperature), 4);
     uint8_t degree_pos = strlen(temperature_text);
     memcpy(&temperature_text[degree_pos], "°", 3);
+    memcpy(&temperature_text[degree_pos + 2], UNIT_SYSTEM, 2);
     text_layer_set_text(&temperature_layer, temperature_text);
   }
   

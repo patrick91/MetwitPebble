@@ -77,9 +77,19 @@
         },
         {
             "characterRegex": "[:0-9]",
-            "defName": "FONT_ROBOTO_BOLD_SUBSET_49",
+            "defName": "FONT_MYRIAD_PRO_49",
             "type": "font",
-            "file": "fonts/Roboto-Bold.ttf"
+            "file": "fonts/MyriadPro-Regular.ttf"
+        },
+        {
+            "defName": "FONT_MYRIAD_PRO_23",
+            "type": "font",
+            "file": "fonts/MyriadPro-Regular.ttf"
+        },
+        {
+            "defName": "FONT_MYRIAD_PRO_35",
+            "type": "font",
+            "file": "fonts/MyriadPro-Regular.ttf"
         }
     ],
     "friendlyVersion": "VERSION",
