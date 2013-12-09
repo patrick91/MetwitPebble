@@ -4,6 +4,10 @@ Metwit watchface for Pebble
 
 -------
 
+Requirements
+============
+- Httpebble (https://github.com/Katharine/httpebble-watch)
+
 Runserver on heroku
 ===================
 
