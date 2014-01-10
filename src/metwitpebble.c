@@ -164,6 +164,8 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
 
   if(!is_located() || (t->tick_time->tm_min % 30) == 0) {
     http_location_request();
+  } else {
+    http_time_request();
   }
 
 }
@@ -204,7 +206,7 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
     //HANDLE TEMPERATURE RECEIVE
     int16_t temperature = temperature_tuple->value->int16;
     uint8_t sign = 0;
-    if(temperature > 0)
+    if(temperature >= 0)
       sign = 1;
     memcpy(&temperature_text[sign], itoa(temperature), 4);
     uint8_t degree_pos = strlen(temperature_text);
