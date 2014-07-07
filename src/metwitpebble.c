@@ -41,6 +41,21 @@ enum WeatherKey {
   WEATHER_TEMPERATURE_KEY,
 };
 
+static void request_weather(void) {
+  Tuplet value = TupletInteger(1, 1);
+
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+
+  if (iter == NULL) {
+    return;
+  }
+
+  dict_write_tuplet(iter, &value);
+
+  app_message_outbox_send();
+}
+
 static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00";
   strftime(time_text, sizeof(time_text), "%T", tick_time);
@@ -50,6 +65,8 @@ static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
   strftime(date_text, sizeof(date_text), "%a, %b %d", tick_time);
   text_layer_set_text(date_layer, date_text);
 
+  if (tick_time->tm_min % 30 == 0)
+    request_weather();
 }
 
 static void render_image(uint8_t image_index, GContext* ctx) {
@@ -75,22 +92,6 @@ static void in_received_handler(DictionaryIterator *iter, void *ctx) {
     text_layer_set_text(temperature_layer, temp_tuple->value->cstring);
   }
 
-}
-
-static void send_cmd(void) {
-  Tuplet value = TupletInteger(1, 1);
-
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-
-  if (iter == NULL) {
-    return;
-  }
-
-  dict_write_tuplet(iter, &value);
-  dict_write_end(iter);
-
-  app_message_outbox_send();
 }
 
 void deinit() {
@@ -141,8 +142,6 @@ void init() {
   struct tm *current_time = localtime(&now);
   handle_second_tick(current_time, SECOND_UNIT);
   tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
-
-  send_cmd();
 }
 
 int main(void) {
