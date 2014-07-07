@@ -1,5 +1,107 @@
 {
-  "title":    "Metwit Pebble",
-  "type":     "Pebble watchface",
-  "version":  "1.0.1"
+  "uuid": "9141b628-bc89-498e-b147-049f49c099ad",
+  "shortName": "Metwit",
+  "longName": "Metwit",
+  "companyName": "A.Stagi-P.Arminio",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {},
+  "resources": {
+    "media": [
+      {
+        "type": "png",
+        "name": "ICON_CLOUDY",
+        "file": "images/cloudy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_FOGGY",
+        "file": "images/foggy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_HAILING",
+        "file": "images/hailing.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_MOON",
+        "file": "images/moon.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_PCLOUDY",
+        "file": "images/pcloudy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_PMOONCLOUDY",
+        "file": "images/pmooncloudy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_RAINY",
+        "file": "images/rainy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_SNOWFLURRY",
+        "file": "images/snowflurry.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_SNOWY",
+        "file": "images/snowy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_SUNNY",
+        "file": "images/sunny.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_WINDY",
+        "file": "images/windy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_STORMY",
+        "file": "images/stormy.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_HEAVYSEAS",
+        "file": "images/hseas.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_CALMSEAS",
+        "file": "images/cseas.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_UNKNOWN",
+        "file": "images/unknown.png"
+      },
+      {
+        "type": "font",
+        "characterRegex": "[:0-9]",
+        "name": "FONT_MYRIAD_PRO_49",
+        "file": "fonts/MyriadPro-Regular.ttf"
+      },
+      {
+        "type": "font",
+        "name": "FONT_MYRIAD_PRO_23",
+        "file": "fonts/MyriadPro-Regular.ttf"
+      },
+      {
+        "type": "font",
+        "name": "FONT_MYRIAD_PRO_35",
+        "file": "fonts/MyriadPro-Regular.ttf"
+      }
+    ]
+  }
 }

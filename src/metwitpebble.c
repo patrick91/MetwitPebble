@@ -1,8 +1,5 @@
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
+#include "pebble.h"
 #include "config.h"
-#include "http.h"
 #include "util.h"
 
 #define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x04, 0x9F, 0x49, 0xC0, 0x99, 0xAD }
@@ -24,18 +21,11 @@
 
 #define REQUEST_WEATHER_URL "http://glacial-island-2381.herokuapp.com/weather"
 
-PBL_APP_INFO(MY_UUID,
-             "Metwit", "A.Stagi-P.Arminio",
-             1, 0, /* App version */
-             DEFAULT_MENU_ICON,
-             APP_INFO_WATCH_FACE);
-
-Window window;
-TextLayer time_layer;
-TextLayer date_layer;
-TextLayer temperature_layer;
-BmpContainer icon_weather;
-Layer icon_w_layer;
+static TextLayer *time_layer;
+static TextLayer *date_layer;
+static TextLayer *temperature_layer;
+static Window *window;
+static Layer *layer;
 
 uint8_t STATUS_RESOURCES[] = {
   RESOURCE_ID_ICON_UNKNOWN,
@@ -58,120 +48,64 @@ uint8_t STATUS_RESOURCES[] = {
 int my_latitude = -1, my_longitude = -1;
 int8_t current_weather_status = -1;
 
-void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t);
-void handle_init(AppContextRef ctx);
-void on_failure(int32_t cookie, int http_status, void* context);
-void on_success(int32_t cookie, int http_status, DictionaryIterator* received, void* context);
-void on_location(float latitude, float longitude, float altitude, float accuracy, void* context);
-void on_reconnect(void* context);
-void request_weather();
-int8_t need_to_refresh_icon(uint8_t status);
-void reset_location();
-int8_t is_located();
-
-void pbl_main(void *params) {
-  PebbleAppHandlers handlers = {
-    .init_handler = &handle_init,
-    .tick_info = {
-      .tick_handler = &handle_minute_tick,
-      .tick_units = MINUTE_UNIT
-    },
-    .messaging_info = {
-      .buffer_sizes = {
-        .inbound = 124,
-        .outbound = 124,
-      }
-    }
-  };
-  app_event_loop(params, &handlers);
+static void render_image(int image_index, GContext* ctx) {
+  GBitmap *image = gbitmap_create_with_resource(STATUS_RESOURCES[image_index]);
+  GRect bounds = image->bounds;
+  graphics_draw_bitmap_in_rect(ctx, image,
+    (GRect) { .origin = { 0, 105 }, .size = bounds.size });
 }
 
-void handle_init(AppContextRef ctx) {
-
-  window_init(&window, "Metwit");
-  window_stack_push(&window, true);
-  window_set_background_color(&window, GColorBlack);
-
-  resource_init_current_app(&APP_RESOURCES);
-
-  //Init time layer
-  text_layer_init(&time_layer, window.layer.frame);
-  text_layer_set_text(&time_layer, "00:00");
-  text_layer_set_font(&time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_49)));
-  text_layer_set_text_color(&time_layer, GColorWhite);
-  text_layer_set_background_color(&time_layer, GColorClear);
-  text_layer_set_text_alignment(&time_layer, GTextAlignmentCenter);
-  layer_set_frame(&time_layer.layer, TIME_FRAME);
-  layer_add_child(&window.layer, &time_layer.layer);
-
-  //Init date layer
-  text_layer_init(&date_layer, window.layer.frame);
-  text_layer_set_text(&date_layer, "XXX, XXX 00");
-  text_layer_set_font(&date_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_23)));
-  text_layer_set_text_color(&date_layer, GColorWhite);
-  text_layer_set_background_color(&date_layer, GColorClear);
-  text_layer_set_text_alignment(&date_layer, GTextAlignmentCenter);
-  layer_set_frame(&date_layer.layer, DATE_FRAME);
-  layer_add_child(&window.layer, &date_layer.layer);
-
-  //Draw horizontal line
-  graphics_context_set_stroke_color(ctx, GColorWhite);
-  graphics_draw_line(ctx, GPoint(0, 100), GPoint(100, 100));
-
-  //Init temperature layer
-  text_layer_init(&temperature_layer, window.layer.frame);
-  text_layer_set_text(&temperature_layer, "...");
-  text_layer_set_font(&temperature_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_35)));
-  text_layer_set_text_color(&temperature_layer, GColorWhite);
-  text_layer_set_background_color(&temperature_layer, GColorClear);
-  layer_set_frame(&temperature_layer.layer, TEMPERATURE_FRAME);
-  layer_add_child(&window.layer, &temperature_layer.layer);
-
-  //Init weather icon
-  layer_add_child(&window.layer, &icon_w_layer);
-
-  http_register_callbacks((HTTPCallbacks){.failure=on_failure,.success=on_success,.reconnect=on_reconnect,.location=on_location}, (void*)ctx);
-
-  PblTm tm;
-  PebbleTickEvent t;
-
-  get_time(&tm);
-  t.tick_time = &tm;
-  t.units_changed = SECOND_UNIT | MINUTE_UNIT | HOUR_UNIT | DAY_UNIT;
-    
-  handle_minute_tick(ctx, &t);
+static void layer_update_callback(Layer *me, GContext* ctx) {
+  render_image(1, ctx);
+  text_layer_set_text(time_layer, "12:30");
+  text_layer_set_text(date_layer, "Sun, 4");
+  text_layer_set_text(temperature_layer, "23°C");
 }
 
-void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
-
-  static char date_text[] = "XXX, XXX 00";
-  static char hour_text[] = "00:00";
-
-  if (t->units_changed & DAY_UNIT) {
-    string_format_time(date_text, sizeof(date_text),
-                       "%a, %b %d",
-                       t->tick_time);
-    text_layer_set_text(&date_layer, date_text);
-  }
-
-  if (clock_is_24h_style()) {
-    string_format_time(hour_text, sizeof(hour_text), "%H:%M", t->tick_time);
-  } else {
-    string_format_time(hour_text, sizeof(hour_text), "%I:%M", t->tick_time);
-  }
-
-  text_layer_set_text(&time_layer, hour_text);
-
-  if(!is_located() || (t->tick_time->tm_min % 30) == 0) {
-    http_location_request();
-  } else {
-    http_time_request();
-  }
-
+void deinit() {
 }
 
-void on_failure(int32_t cookie, int http_status, void* context) {
-  //HANDLE FAILURE
+void init() {
+
+  window = window_create();
+  window_stack_push(window, true /* Animated */);
+  window_set_background_color(window, GColorBlack);
+
+  // Init the layer for display the image
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_frame(window_layer);
+  layer = layer_create(bounds);
+  layer_set_update_proc(layer, layer_update_callback);
+  layer_add_child(window_layer, layer);
+
+  time_layer = text_layer_create(TIME_FRAME);
+  text_layer_set_font(time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_49)));
+  text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
+  text_layer_set_text_color(time_layer, GColorWhite);
+  text_layer_set_background_color(time_layer, GColorClear);
+  layer_add_child(window_layer, text_layer_get_layer(time_layer));
+
+  date_layer = text_layer_create(DATE_FRAME);
+  text_layer_set_font(date_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_23)));
+  text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+  text_layer_set_text_color(date_layer, GColorWhite);
+  text_layer_set_background_color(date_layer, GColorClear);
+  layer_add_child(window_layer, text_layer_get_layer(date_layer));
+
+  temperature_layer = text_layer_create(TEMPERATURE_FRAME);
+  text_layer_set_font(temperature_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MYRIAD_PRO_35)));
+  text_layer_set_text_color(temperature_layer, GColorWhite);
+  text_layer_set_background_color(temperature_layer, GColorClear);
+  layer_add_child(window_layer, text_layer_get_layer(temperature_layer));
+}
+
+int main(void) {
+  init();
+  app_event_loop();
+  deinit();
+}
+
+/*void on_failure(int32_t cookie, int http_status, void* context) {
   reset_location();
 }
 
@@ -214,7 +148,7 @@ void on_success(int32_t cookie, int http_status, DictionaryIterator* received, v
     memcpy(&temperature_text[degree_pos + 2], UNIT_SYSTEM, 2);
     text_layer_set_text(&temperature_layer, temperature_text);
   }
-  
+
 }
 
 void on_location(float latitude, float longitude, float altitude, float accuracy, void* context) {
@@ -228,6 +162,7 @@ void on_reconnect(void* context) {
   reset_location();
   request_weather();
 }
+
 
 void request_weather() {
   if(!is_located()) {
@@ -271,4 +206,4 @@ int8_t need_to_refresh_icon(uint8_t status) {
     return 0;
   else
     return 1;
-}
+}*/
