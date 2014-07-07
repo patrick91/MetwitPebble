@@ -56,7 +56,7 @@ static void request_weather(void) {
   app_message_outbox_send();
 }
 
-static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
+static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00";
   strftime(time_text, sizeof(time_text), "%T", tick_time);
   text_layer_set_text(time_layer, time_text);
@@ -65,7 +65,7 @@ static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
   strftime(date_text, sizeof(date_text), "%a, %b %d", tick_time);
   text_layer_set_text(date_layer, date_text);
 
-  if (tick_time->tm_min % 30 == 0)
+  if (tick_time->tm_min % 15 == 0)
     request_weather();
 }
 
@@ -140,8 +140,8 @@ void init() {
 
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
-  handle_second_tick(current_time, SECOND_UNIT);
-  tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+  handle_minute_tick(current_time, MINUTE_UNIT);
+  tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 }
 
 int main(void) {

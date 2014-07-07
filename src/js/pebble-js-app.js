@@ -10,7 +10,7 @@ Pebble.addEventListener("ready", function() {
 function fetchWeather(latitude, longitude, unit) {
   var response;
   var req = new XMLHttpRequest();
-  req.open('GET', "http://192.168.0.6:5000/weather?" +
+  req.open('GET', "http://192.168.1.113:5000/weather?" +
     "lat=" + latitude + "&lon=" + longitude + "&unit=" + unit, true);
   req.onload = function(e) {
     if (req.readyState == 4) {
