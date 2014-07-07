@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 
 from metwit import Metwit
@@ -47,20 +49,13 @@ def get_result_with_temperature(results):
     return None
 
 
-@app.route('/weather', methods=['POST'])
+@app.route('/weather', methods=['GET'])
 def weather():
-    """
-    INPUT BUNDLE: {'0': latitude, '1': longitude, '2': unit ("F" or "C")}
-    E.G. {'0': 439596, '1': 109551, '2': 'F'}
 
-    OUTPUT BUNDLE: {'0': error code, '1': weather condition, '2': temperature}
-    E.G. {'0': 0, '1': 1, '2': 78}
-    """
+    latitude = float(request.args.get('lat')) / 10000
+    longitude = float(request.args.get('lon')) / 10000
 
-    latitude = float(request.json['0']) / 10000
-    longitude = float(request.json['1']) / 10000
-
-    format = request.json.get('2', 'C')
+    format = request.args.get('unit')
 
     results = Metwit.weather.get(location_lat=latitude, location_lng=longitude)
 
@@ -84,10 +79,11 @@ def weather():
         else:
             temperature = temperature * 9 / 5.0 - 459.67
 
+        formatted_temperature = format_temperature(temperature)
+
         return jsonify({
-            '0': 0,
-            '1': status,
-            '2': format_temperature(temperature)
+            'status': status,
+            'temperature': formatted_temperature
         }), 200
     else:
         error_code = error_codes['NO_RESULTS']
@@ -95,12 +91,11 @@ def weather():
     return jsonify({'0': error_code}), 503
 
 def format_temperature(temperature):
-    return int(round(temperature))
+    return str(int(round(temperature)))
 
 @app.route('/')
 def home():
     return render_template('index.html')
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
