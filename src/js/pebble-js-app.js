@@ -6,11 +6,11 @@ Pebble.addEventListener("ready", function() {
 });
 
 
-function fetchWeather(latitude, longitude) {
+function fetchWeather(latitude, longitude, unit) {
   var response;
   var req = new XMLHttpRequest();
   req.open('GET', "http://192.168.0.6:5000/weather?" +
-    "lat=" + latitude + "&lon=" + longitude + "&unit=C", true);
+    "lat=" + latitude + "&lon=" + longitude + "&unit=" + unit, true);
   req.onload = function(e) {
     if (req.readyState == 4) {
       if(req.status == 200) {
@@ -21,7 +21,7 @@ function fetchWeather(latitude, longitude) {
           console.log("send" + response.status);
           Pebble.sendAppMessage({
             "0":response.status,
-            "1":response.temperature + "\u00B0C"
+            "1":response.temperature + "\u00B0" + unit
           });
         }
 
@@ -35,7 +35,7 @@ function fetchWeather(latitude, longitude) {
 
 function locationSuccess(pos) {
   var coordinates = pos.coords;
-  fetchWeather(coordinates.latitude, coordinates.longitude);
+  fetchWeather(coordinates.latitude, coordinates.longitude, 'C');
 }
 
 function locationError(err) {

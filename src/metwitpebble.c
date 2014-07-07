@@ -45,6 +45,11 @@ static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00";
   strftime(time_text, sizeof(time_text), "%T", tick_time);
   text_layer_set_text(time_layer, time_text);
+
+  static char date_text[] = "XXX, XXX 00";
+  strftime(date_text, sizeof(date_text), "%a, %b %d", tick_time);
+  text_layer_set_text(date_layer, date_text);
+
 }
 
 static void render_image(uint8_t image_index, GContext* ctx) {
