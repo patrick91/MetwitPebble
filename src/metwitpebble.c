@@ -1,5 +1,4 @@
 #include "pebble.h"
-#include "config.h"
 #include "util.h"
 
 #define TIME_FRAME (GRect(0, 6, 144, 168-6))
@@ -79,6 +78,8 @@ static void render_image(uint8_t image_index, GContext* ctx) {
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *ctx) {
+
+   APP_LOG(APP_LOG_LEVEL_INFO, "Time flies!");
 
   Tuple *icon_tuple = dict_find(iter, WEATHER_ICON_KEY);
 

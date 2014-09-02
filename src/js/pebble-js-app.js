@@ -1,4 +1,5 @@
 var initialized = false;
+var base_url = "http://192.168.0.6:5000";
 
 Pebble.addEventListener("ready", function() {
   console.log("ready called!");
@@ -10,7 +11,7 @@ Pebble.addEventListener("ready", function() {
 function fetchWeather(latitude, longitude, unit) {
   var response;
   var req = new XMLHttpRequest();
-  req.open('GET', "http://192.168.1.113:5000/weather?" +
+  req.open('GET', base_url + "/weather?" +
     "lat=" + latitude + "&lon=" + longitude + "&unit=" + unit, true);
   req.onload = function(e) {
     if (req.readyState == 4) {
@@ -36,7 +37,11 @@ function fetchWeather(latitude, longitude, unit) {
 
 function locationSuccess(pos) {
   var coordinates = pos.coords;
-  fetchWeather(coordinates.latitude, coordinates.longitude, 'C');
+  var uofm = localStorage.getItem("uofm");
+  if (!uofm) {
+    uofm = 'C'
+  }
+  fetchWeather(coordinates.latitude, coordinates.longitude, uofm);
 }
 
 function locationError(err) {
@@ -62,3 +67,16 @@ Pebble.addEventListener("webviewclosed",
                           console.log(e.type);
                           console.log(e.response);
                         });
+
+Pebble.addEventListener("showConfiguration", function() {
+  console.log("showing configuration");
+  Pebble.openURL(base_url + '/pebble/settings');
+});
+
+Pebble.addEventListener("webviewclosed", function(e) {
+  console.log("configuration closed");
+  var options = JSON.parse(decodeURIComponent(e.response));
+  console.log("Options = " + JSON.stringify(options));
+  localStorage.setItem("uofm", options['unit-measure']);
+  window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+});
