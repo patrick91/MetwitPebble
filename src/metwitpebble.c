@@ -1,5 +1,4 @@
 #include "pebble.h"
-#include "util.h"
 
 #define TIME_FRAME (GRect(0, 6, 144, 168-6))
 #define DATE_FRAME (GRect(0, 62, 144, 168-62))
