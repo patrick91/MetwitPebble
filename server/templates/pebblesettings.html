@@ -45,10 +45,16 @@
         var options = {
           'unit-measure': $("#special-feature").val(),
         }
+        localStorage.setItem("uofm", $("#special-feature").val());
         return options;
       }
 
-      $().ready(function() {
+      $( document ).ready(function() {
+        var uofm = localStorage.getItem("uofm");
+        if (uofm) {
+          $("#special-feature").val(uofm);
+          $('#special-feature').slider('refresh');
+        }
 
         $("#b-submit").click(function() {
           console.log("Submit");
