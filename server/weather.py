@@ -97,5 +97,9 @@ def format_temperature(temperature):
 def home():
     return render_template('index.html')
 
+@app.route('/pebble/settings')
+def pebble_settings():
+    return render_template('pebblesettings.html')
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
