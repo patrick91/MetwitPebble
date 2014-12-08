@@ -1,5 +1,4 @@
 var initialized = false;
-var base_url = "http://192.168.0.6:5000";
 
 Pebble.addEventListener("ready", function() {
   console.log("ready called!");
